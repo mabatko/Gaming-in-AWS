@@ -6,7 +6,7 @@
 ###  - interruption notice
 ###
 ###  You can find latest version here:
-###    https://github.com/mabatko/Gaming-on-AWS/blob/main/termination_check.sh
+###    https://raw.githubusercontent.com/mabatko/Gaming-in-AWS/main/termination_check.sh
 ###
 
 RED='\033[0;31m'
