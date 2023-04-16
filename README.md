@@ -2,6 +2,8 @@
 
 **TLDR:** This repository contains information on how I set up my gaming environment in AWS and how you can do it too.
 
+![KSP menu](ksp.png)
+
 ## Motivation
 I don't have much of a free time, but sometimes when I do, I want to play games. Problem is however, that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
 
@@ -24,15 +26,15 @@ Let's start with the question "Why AWS?". AWS seems to provide the best GPU perf
 
 So why g4ad family?
 
-There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad. Also, according to site https://www.videocardbenchmark.net/gpu_list.php Radeon GPU scores ~20% better in Passmark G3D benchmark.
+There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad. Also, according to site https://www.videocardbenchmark.net/gpu_list.php Radeon GPU scores ~15% better in Passmark G3D benchmark.
 
-Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scores ~60% better than Radeon PRO v520, but costs three time as much.
+Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scores ~50% better than Radeon PRO v520, but costs three time as much.
 
 ### Ubuntu 18.04
 
 Now, when we have instance type sorted out, it's time to decide operating system.
 
-You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances. Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run on Linux.
+You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances. Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run on Linux (no re-run of Fallout New Vegas for me :().
 
 So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed, but give it a try and let me know :)).
 
@@ -107,7 +109,7 @@ Before you launch anything, I suggest you to have following resources created:
 
 ## Implementation
 
-### Launching EC2 instance
+### Launching EC2 (spot) instance
 
 When I launch my gaming instance, I select following options:
 - **Name:** whatever
@@ -125,22 +127,32 @@ When I launch my gaming instance, I select following options:
 - **Advanced details:**
   - **Request Spot Instances:** ☑
   - **IAM instance profile:** Pick the one you created as a pre-requisite
-  - **User data:** this [bash script](https://raw.githubusercontent.com/mabatko/Gaming-in-AWS/main/user_data.sh)
+  - **User data:** this [bash script](https://raw.githubusercontent.com/mabatko/Gaming-in-AWS/main/user_data.sh). You may want to change MYUSER/PASS variables.
 
+If you are lost, [here is a screenshot](instance_creation.png).
 
+### Connecting
 
+At this stage, you can connect to the instance as user 'ubuntu' via SSH with the private key from your SSH key pair. It takes 20-ish minutes for *user data* script to finish. You can see the progress in log file /var/log/cloud-init-output.log on the OS.
 
+Instance is rebooted when the script finishes. When it boots up again, you can connect to it in following ways:
+- over SSH with user ubuntu
+- over SSH with user which was defined in variable MYUSER of *user data* script (unless MYUSER=ubuntu)
+- using NICE DCV client
+  - clients for Windows, Linux and MacOS can be downloaded from here: https://download.nice-dcv.com/
+  - log in to the instance with username/password from the *user data* script
 
+### Steam
 
+Steam launcher is already installed on the instance, but you need to configure it for your user. Click on the "Start" button in the top left corner and search Steam. If everything goes well, Steam launcher downloads Steam client into user's home directory and login window appears.
 
+That should be it. Happy gaming!
 
+## Tips
 
+Although at this point you should be able to install and play Linux games from Steam, there are still some topics worth discussing.
 
-## how to connetct
- windows nice dcv client
-  ubuntu with key
-  user with pass
-
+### Preserving root disk
 
 
 

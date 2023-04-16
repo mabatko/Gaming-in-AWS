@@ -5,8 +5,8 @@
 #### Script output can be found in /var/log/cloud-init-output.log
 ####
 
-MYUSER=<your user>
-PASS=<your pass>
+MYUSER=ubuntu
+PASS=SuperSecretPwd
 
 set -x
 
@@ -89,6 +89,8 @@ if [[ "$MYUSER" != "ubuntu" ]]
 then
   echo "$MYUSER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/90-cloud-init-users
 fi
+
+sudo apt install fio -y
 
 rm -rf NICE-GPG-KEY amdgpu-pro-*.tar.xz amdgpu-pro-*-ubuntu-18.04/ amdgpu-pro-*.tar.xz aws/ awscliv2.zip nice-dcv-2023.0-14852-ubuntu1804-x86_64/ nice-dcv-2023.0-14852-ubuntu1804-x86_64.tgz
 
