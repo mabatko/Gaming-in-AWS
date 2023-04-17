@@ -148,11 +148,31 @@ Steam launcher is already installed on the instance, but you need to configure i
 
 That should be it. Happy gaming!
 
+## Preserving root disk
+
+At this point you should be able to install and play Linux games from Steam. When you are done though, you may (or may not) want to preserve root disk where everything is stored.
+
+![possibilities what to do with the instance](chart3.svg)
+
+Broadly speaking, you have following options:
+- if you run ondemand or persistent spot instance and you don't mind paying for EBS volume when instance is powered off, you can stop/start the instance at will
+- if you don't mind re-deploying a new instance from scratch and installing game(s) manually, you can just terminate your instance after you are done playing
+- if you don't want to always start from scratch and you don't want to pay for EBS volume of stopped instance (or you can't stop your one-time spot instance), you have to create an AMI from the instance before you terminate it.
+
+### Living with AMIs
+
+Since AMIs are immutable, if you want to always preserve latest changes to the disk, you must create new AMI after every gaming session. If you don't need it (e.g. because game saves are in Steam cloud), you can create *golden AMI* and always start your instance from it.
+
+Either way, disk performace of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. 
+
+// fio installed and triggered by cron at boot
+// 30gb disk in 7 minutes -> ksp starup much better
+
 ## Tips
 
-Although at this point you should be able to install and play Linux games from Steam, there are still some topics worth discussing.
 
-### Preserving root disk
+
+### 
 
 
 
