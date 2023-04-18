@@ -5,7 +5,7 @@
 ![KSP menu](ksp.png)
 
 ## Motivation
-I don't have much of a free time, but sometimes when I do, I want to play games. Problem is however, that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
+I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however, that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
 
 It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 5000 hours to make buying a new PC more economical decision.
 
@@ -152,7 +152,7 @@ That should be it. Happy gaming!
 
 At this point you should be able to install and play Linux games from Steam. When you are done though, you may (or may not) want to preserve root disk where everything is stored.
 
-![possibilities what to do with the instance](chart3.svg)
+![possibilities what to do with the instance](chart.svg)
 
 Broadly speaking, you have following options:
 - if you run ondemand or persistent spot instance and you don't mind paying for EBS volume when instance is powered off, you can stop/start the instance at will
@@ -163,10 +163,11 @@ Broadly speaking, you have following options:
 
 Since AMIs are immutable, if you want to always preserve latest changes to the disk, you must create new AMI after every gaming session. If you don't need it (e.g. because game saves are in Steam cloud), you can create *golden AMI* and always start your instance from it.
 
-Either way, disk performace of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. 
-
-// fio installed and triggered by cron at boot
-// 30gb disk in 7 minutes -> ksp starup much better
+Either way, disk performace of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needed them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
+```
+#@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log
+```
+You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes.
 
 ## Tips
 

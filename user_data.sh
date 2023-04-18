@@ -21,7 +21,7 @@ unzip awscliv2.zip
 sudo ./aws/install
 
 sudo dpkg --add-architecture i386
-aws s3 cp --recursive s3://ec2-amd-linux-drivers/latest/ .
+aws s3 cp s3://ec2-amd-linux-drivers/latest/amdgpu-pro-20.20-1184451-ubuntu-18.04.tar.xz .
 tar -xf amdgpu-pro*ubuntu*.xz
 cd amdgpu-pro*/
 sudo apt install linux-modules-extra-$(uname -r) -y
@@ -91,7 +91,8 @@ then
 fi
 
 sudo apt install fio -y
+echo '#@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log' >> /etc/crontab
 
-rm -rf NICE-GPG-KEY amdgpu-pro-*.tar.xz amdgpu-pro-*-ubuntu-18.04/ amdgpu-pro-*.tar.xz aws/ awscliv2.zip nice-dcv-2023.0-14852-ubuntu1804-x86_64/ nice-dcv-2023.0-14852-ubuntu1804-x86_64.tgz
+rm -rf NICE-GPG-KEY amdgpu-pro-*.tar.xz amdgpu-pro-*-ubuntu-18.04/ aws/ awscliv2.zip nice-dcv-2023.0-14852-ubuntu1804-x86_64/ nice-dcv-2023.0-14852-ubuntu1804-x86_64.tgz
 
 sudo shutdown -r now
