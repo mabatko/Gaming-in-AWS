@@ -171,12 +171,17 @@ You will suffer decreased performance for a few minutes after boot, but at least
 
 ## Tips
 
+### Termination check script
 
+If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be usefull. The script is located in home directory of user specified in *user data* script. It checks instances metadata every 5 seconds for rebalance recommendation and interruption notice.
 
-### 
+### Costs
 
-
-
+You are charged for following resources, so try to keep them at bay:
+- EC2 instances
+- EBS volumes
+- EBS snapshots (AMIs fall under this category)
+- data transfer
 
 
 
