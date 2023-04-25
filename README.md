@@ -33,7 +33,7 @@ Let's start with the question "Why AWS?". AWS seems to provide the best GPU perf
 
 So why g4ad family?
 
-There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad. Also, according to site https://www.videocardbenchmark.net/gpu_list.php Radeon GPU scores ~15% better in Passmark G3D benchmark.
+There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though).
 
 Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scores ~50% better than Radeon PRO v520, but costs three time as much.
 
@@ -41,7 +41,7 @@ Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scor
 
 Now, when we have instance type sorted out, it's time to decide operating system.
 
-You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances. Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run natively on Linux. Fortunately, there is Proton from Steam which partially plugs this hole for me (but you may be out of luck).
+You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances (again, in my region). Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run natively on Linux. Fortunately, there is Proton from Steam which partially plugs this hole for me (but you may be out of luck).
 
 So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed but give it a try and let me know :)).
 
@@ -53,17 +53,19 @@ For those who don't know, AWS (usually) has more capacity than is needed to sati
 
 For some, this inconvenience may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Kerbal space program does allow it, so I go with it. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
 
+As a side note: Azure spot instances can be price competitive, but Microsoft warns you only 30 seconds before they stop your instance.
+
 ### NICE DCV
 
 *NICE DCV is a high-performance remote display protocol. It lets you securely deliver remote desktops and application streaming from any cloud or data center to any device, over varying network conditions. By using NICE DCV with Amazon EC2, you can run graphics-intensive applications remotely on Amazon EC2 instances. You can then stream the results to more modest client machines, which eliminates the need for expensive dedicated workstations. *
 
-NICE DCV is free if you run it on AWS EC2 instance. I guess (hope) that it is better than using RDP for Windows of VNC for Linux. I haven't done any research in this area. If you did, let me know how it fairs in comparison with other options. I'm particularly interested in network bandwidth consumption.
+NICE DCV is free if you run it on AWS EC2 instance. I guess (hope) that it is better than using RDP for Windows or VNC for Linux. I haven't done any research in this area. If you did, let me know how it fairs in comparison with other options. I'm particularly interested in network bandwidth consumption.
 
 ### Steam
 
 I have most of my games from Steam, so it's a must-have for me. Fortunately, there is an installer for Ubuntu.
 
-Apart from installation of games, Steam has some features which are relevant to our topic:
+Apart from installation of Linux native games, Steam has some features which are relevant to our topic:
 1. Already mentioned Proton, which is a compatibility layer allowing to run some Windows games on Linux.
 2. Games can store saves in Steam cloud (at least games I play do). This is important if you want to terminate your instance and delete its disk in order to save as much money as possible.
 3. You can enable FPS counter in Steam client, so you can easily determine if your setup is adequate. Of course, you can install another tool if you wish...
@@ -95,7 +97,7 @@ You should see two entries:
 - All G and VT Spot Instance Requests
 - Running On-Demand All G and VT instances
 
-In my case, both were set to 0 vCPU. I requested increase to 4 vCPU (because g4ad.xlarge has 4 cores). At first my requests were auto-declined, because I don't have high AWS bills (as a reason for decline AWS stated that they are protecting me from unexpectedly high bill). I appealed the decision and re-opened the requests. I argued that I'm certified AWS solutions architect and developer (which I really am :)) and hopefully I know what I'm doing. Humans took over the requests and my limits were increased in about a day.
+In my case, both were set to 0 vCPU. I requested increase to 4 vCPU (because g4ad.xlarge has 4 cores). At first my requests were auto-declined, because I don't have high AWS bills (as a reason for decline AWS stated that they are protecting me from unexpectedly high invoice). I appealed the decision and re-opened the requests. I argued that I'm certified AWS solutions architect and developer (which I really am :)) and hopefully I know what I'm doing. Humans took over the requests and my limits were increased in about a day.
 
 ### VPC, subnet, instance profile, etc...
 
@@ -123,7 +125,7 @@ Before you launch anything, I suggest you have following resources created:
 
 When I launch my gaming instance, I select following options:
 - **Name:** whatever
-- **Application and OS Images (Amazon Machine Image)**: Ubuntu 18.04 is not offered by AWS in a drop-down menu anymore, because it is too old. However, Ubuntu 18.04 AMIs are still maintained and kept up to date by Canonical - company behind Ubuntu. You can find the most up-to-date AMI for your region on this page: https://cloud-images.ubuntu.com/locator/ec2/ . Copy AMI ID from there and search for it in AWS console. You will find the AMI under Community AMIs.
+- **Application and OS Images (Amazon Machine Image)**: Ubuntu 18.04 is not offered by AWS in a drop-down menu anymore, because it is too old. However, Ubuntu 18.04 AMIs are still maintained and kept up to date by Canonical - company behind Ubuntu. You can find the most up-to-date AMI for your region on [this page](https://cloud-images.ubuntu.com/locator/ec2/). Copy AMI ID from there and search for it in AWS console. You will find the AMI under Community AMIs.
 - **Instance type:** g4ad.xlarge
 - **Key pair (login):** key pair created as a pre-requisite
 - **Network settings:**
@@ -149,7 +151,7 @@ Instance is rebooted when the script finishes. When it boots up again, you can c
 - over SSH with user ubuntu
 - over SSH with user which was defined in variable MYUSER of *user data* script (unless MYUSER=ubuntu)
 - using NICE DCV client
-  - clients for Windows, Linux and MacOS can be downloaded from here: https://download.nice-dcv.com/
+  - clients for Windows, Linux and MacOS can be downloaded from [here](https://download.nice-dcv.com/)
   - log in to the instance with username/password from the *user data* script
 
 ### Steam

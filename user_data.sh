@@ -15,6 +15,7 @@ set -x
 #### https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-amd-driver.html
 ####
 
+sudo apt update
 sudo apt install unzip -y
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
