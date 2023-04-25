@@ -1,13 +1,20 @@
 # Gaming in AWS
 
-**TLDR:** This repository contains information on how I set up my gaming environment in AWS and how you can do it too.
+**TLDR:** This repository contains information on how I set up my low cost gaming environment in AWS and how you can do it too.
 
 ![KSP menu](ksp.png)
 
 ## Motivation
-I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however, that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
+
+I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
 
 It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 5000 hours to make buying a new PC more economical decision.
+
+## Limitations
+
+If this sounds too good to be true, you are right. There are some limitations to consider.
+- Since your game is (potentially) running hundreds of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
+- Cloud providers don't offer very wide range of GPUs and most of them are suitable for computing, not for 3D workloads. Even the most performant GPU I found in a cloud is only half as powerful as top-notch GeForce RTX 4090. Don't expect 4K max quality raytracing orgies any time soon.
 
 ## Setup
 
@@ -22,7 +29,7 @@ My setup is following:
 
 Why g4ad.xlarge EC2 instance?
 
-Let's start with the question "Why AWS?". AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g. half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
+Let's start with the question "Why AWS?". AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g., half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
 
 So why g4ad family?
 
@@ -34,40 +41,43 @@ Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scor
 
 Now, when we have instance type sorted out, it's time to decide operating system.
 
-You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances. Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run on Linux (no re-run of Fallout New Vegas for me :().
+You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances. Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run natively on Linux. Fortunately, there is Proton from Steam which partially plugs this hole for me (but you may be out of luck).
 
-So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed, but give it a try and let me know :)).
+So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed but give it a try and let me know :)).
 
 Another reason to go with Ubuntu is that Steam supports it. I tried Amazon Linux 2 AMI which comes with GPU driver preinstalled and I even managed to start Steam client, but all windows where black.
 
 #### Spot EC2 instance
 
-For those who don't know, AWS (usualy) has more capacity than is needed to satify customer demand. This spare capacity is sold in the form of spot EC2 instances at a discount. Caveat is that AWS can take this capacity back with only little warning (2 minutes). This didn't happen to me yet, but there is always a chance.
+For those who don't know, AWS (usually) has more capacity than is needed to satisfy customer demand. This spare capacity is sold in the form of spot EC2 instances at a discount. Caveat is that AWS can take this capacity back with only little warning (2 minutes). This didn't happen to me yet, but there is always a chance.
 
-For some, this inconveniece may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Kerbal space program does allow it, so I go with it. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
+For some, this inconvenience may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Kerbal space program does allow it, so I go with it. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
 
 ### NICE DCV
 
-*NICE DCV is a high-performance remote display protocol. It lets you securely deliver remote desktops and application streaming from any cloud or data center to any device, over varying network conditions. By using NICE DCV with Amazon EC2, you can run graphics-intensive applications remotely on Amazon EC2 instances. You can then stream the results to more modest client machines, which eliminates the need for expensive dedicated workstations.*
+*NICE DCV is a high-performance remote display protocol. It lets you securely deliver remote desktops and application streaming from any cloud or data center to any device, over varying network conditions. By using NICE DCV with Amazon EC2, you can run graphics-intensive applications remotely on Amazon EC2 instances. You can then stream the results to more modest client machines, which eliminates the need for expensive dedicated workstations. *
 
 NICE DCV is free if you run it on AWS EC2 instance. I guess (hope) that it is better than using RDP for Windows of VNC for Linux. I haven't done any research in this area. If you did, let me know how it fairs in comparison with other options. I'm particularly interested in network bandwidth consumption.
 
 ### Steam
 
-I have most of my games from Steam, so it's a must-have for me. Fortunately there is an installer for Ubuntu.
+I have most of my games from Steam, so it's a must-have for me. Fortunately, there is an installer for Ubuntu.
 
 Apart from installation of games, Steam has some features which are relevant to our topic:
-1. Games can store saves in Steam cloud (at least games I play do). This is important if you want to terminate your instance and delete its disk in order to save as much money as possible.
-2. You can enable FPS counter in Steam client, so you can easily determine if your setup is adequate. Of course you can install other tool if you wish...
+1. Already mentioned Proton, which is a compatibility layer allowing to run some Windows games on Linux.
+2. Games can store saves in Steam cloud (at least games I play do). This is important if you want to terminate your instance and delete its disk in order to save as much money as possible.
+3. You can enable FPS counter in Steam client, so you can easily determine if your setup is adequate. Of course, you can install another tool if you wish...
 
 ## Pre-requisites
 
 ### Region
 
-First and foremost you must select a region based on these criteria:
+First and foremost, you must select a region based on these criteria:
 - it must have g4ad instances - not all regions have them
-- it should be geograficaly close to you in order to have better latency
+- it should be geographically close to you in order to have better latency
 - if you are price sensitive, select more distant but cheaper region
+
+There are web sites which [measure latency](https://www.cloudping.cloud/aws) from your browser to AWS regions. Take the results with a big grain of salt though. Real latency between EC2 instance and my PC measured by ping command was MUCH better than what the website says.
 
 You can check instance type availability and pricing on these pages:
 - [Amazon EC2 On-Demand Pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
@@ -89,12 +99,12 @@ In my case, both were set to 0 vCPU. I requested increase to 4 vCPU (because g4a
 
 ### VPC, subnet, instance profile, etc...
 
-Before you launch anything, I suggest you to have following resources created:
+Before you launch anything, I suggest you have following resources created:
 - VPC
 - subnet
-  - not all availability zones in a region must have g4ad instaces available (in my region only two out of three have them)
+  - not all availability zones in a region must have g4ad instances available (in my region only two out of three have them)
     - spot prices for instances don't have to be the same in all availability zones (there is a small difference in my region)
-  - subnet should be public, i.e. you should be able to reach your instance over the Internet
+  - subnet should be public, i.e., you should be able to reach your instance over the Internet
 - security group
   - I allowed all traffic incoming from my IP
     - if your IP changes, you will have to update this rule
@@ -123,7 +133,7 @@ When I launch my gaming instance, I select following options:
 - **Storage:** 
   - **Size:** ~10GB is taken by OS, so you definitely want more than that
   - **Volume type:** gp3 should be cheaper than gp2 and more performant
-  - :warning: **Delete on temination:** Select "No". This is important if you use spot instance. By default, when EC2 instance is terminated, root disk is deleted. In our case it would mean that everything is lost when you shut down your EC2.
+  - :warning: **Delete on termination:** Select "No". This is important if you use spot instance. By default, when EC2 instance is terminated, root disk is deleted. In our case it would mean that everything is lost when you shut down your EC2.
 - **Advanced details:**
   - **Request Spot Instances:** ☑
   - **IAM instance profile:** Pick the one you created as a pre-requisite
@@ -155,7 +165,7 @@ At this point you should be able to install and play Linux games from Steam. Whe
 ![possibilities what to do with the instance](chart.svg)
 
 Broadly speaking, you have following options:
-- if you run ondemand or persistent spot instance and you don't mind paying for EBS volume when instance is powered off, you can stop/start the instance at will
+- if you run on-demand or persistent spot instance and you don't mind paying for EBS volume when instance is powered off, you can stop/start the instance at will
 - if you don't mind re-deploying a new instance from scratch and installing game(s) manually, you can just terminate your instance after you are done playing
 - if you don't want to always start from scratch and you don't want to pay for EBS volume of stopped instance (or you can't stop your one-time spot instance), you have to create an AMI from the instance before you terminate it.
 
@@ -163,7 +173,7 @@ Broadly speaking, you have following options:
 
 Since AMIs are immutable, if you want to always preserve latest changes to the disk, you must create new AMI after every gaming session. If you don't need it (e.g. because game saves are in Steam cloud), you can create *golden AMI* and always start your instance from it.
 
-Either way, disk performace of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needed them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
+Either way, disk performance of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore, it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needed them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
 ```
 #@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log
 ```
@@ -173,7 +183,7 @@ You will suffer decreased performance for a few minutes after boot, but at least
 
 ### Termination check script
 
-If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be usefull. The script is located in home directory of user specified in *user data* script. It checks instances metadata every 5 seconds for rebalance recommendation and interruption notice.
+If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice.
 
 ### Costs
 
@@ -183,7 +193,11 @@ You are charged for following resources, so try to keep them at bay:
 - EBS snapshots (AMIs fall under this category)
 - data transfer
 
+### AWS Budgets
 
+I set up [AWS Budgets](https://aws.amazon.com/aws-cost-management/aws-budgets/) email notifications which let me know when I spend more than defined threshold. You will be glad you set it up when you forget to power off your gaming instance.
+
+Two budgets are free, so why not use them?
 
 
 
