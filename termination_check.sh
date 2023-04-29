@@ -25,10 +25,10 @@ while true; do
     then
       echo -e "`date`: $GREEN OK $NC"
     else
-      echo -e "`date`: $YELLOW NOTICE @ $REBALANCE $NC"
+      echo -e "`date`: $YELLOW NOTICE @ $REBALANCE $NC \007"
     fi
   else
-    echo -e "`date`: $RED TERMINATION @ $INTERRUPTION $NC"
+    echo -e "`date`: $RED TERMINATION @ $INTERRUPTION $NC \007"
   fi
 
   sleep 5

@@ -18,7 +18,7 @@ If this sounds too good to be true, you are right. There are some limitations to
 
 ## Setup
 
-My setup is following:
+After a lot of research, I settled to following setup:
 - g4ad.xlarge EC2 spot instance (4 vCPUs, 16GB RAM, Radeon PRO v520 GPU) running
 - Ubuntu 18.04 AMI with 
   - AMD GPU driver
@@ -53,7 +53,7 @@ For those who don't know, AWS (usually) has more capacity than is needed to sati
 
 For some, this inconvenience may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Kerbal space program does allow it, so I go with it. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
 
-As a side note: Azure spot instances can be price competitive, but Microsoft warns you only 30 seconds before they stop your instance.
+As a side note: Azure and Google cloud spot instances can be price competitive, but they warn you only 30 seconds before they stop your instance.
 
 ### NICE DCV
 
@@ -175,17 +175,17 @@ Broadly speaking, you have following options:
 
 Since AMIs are immutable, if you want to always preserve latest changes to the disk, you must create new AMI after every gaming session. If you don't need it (e.g. because game saves are in Steam cloud), you can create *golden AMI* and always start your instance from it.
 
-Either way, disk performance of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore, it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needed them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
+Either way, disk performance of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore, it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needs them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
 ```
 #@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log
 ```
-You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes.
+You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
 
 ## Tips
 
 ### Termination check script
 
-If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice.
+If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep.
 
 ### Costs
 
