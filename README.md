@@ -193,7 +193,15 @@ If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Positi
 
 ### Steam compatibility
 
-After steam client is installed and you want to play Windows games on Linux, enable Steam play. If your game doesn't work properly, try to use different version of Proton.
+After steam client is installed and you want to play Windows games on Linux, enable Steam play:
+```
+Steam -> Settings -> Steam Play -> Enable Steam Play for all other titles
+```
+
+If your game doesn't work properly, try to use different version of Proton:
+```
+Select game in Library -> Manage (gear icon on the right) -> Properties -> Compatibility -> Force the use of a specifit Steam Play compatibility tool
+```
 
 ### Costs
 
