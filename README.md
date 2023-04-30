@@ -13,13 +13,13 @@ It is possible to play games on a VM which costs less than 20 cents per hour. Th
 ## Limitations
 
 If this sounds too good to be true, you are right. There are some limitations to consider.
-- Since your game is (potentially) running hundreds of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
+- Since your game is running (potentially) hundreds of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
 - Cloud providers don't offer very wide range of GPUs and most of them are suitable for computing, not for 3D workloads. Even the most performant GPU I found in a cloud is only half as powerful as top-notch GeForce RTX 4090. Don't expect 4K max quality raytracing orgies any time soon.
 
 ## Setup
 
 After a lot of research, I settled to following setup:
-- g4ad.xlarge EC2 spot instance (4 vCPUs, 16GB RAM, Radeon PRO v520 GPU) running
+- AWS g4ad.xlarge EC2 spot instance (4 vCPUs, 16GB RAM, Radeon PRO v520 GPU) running
 - Ubuntu 18.04 AMI with 
   - AMD GPU driver
   - NICE DCV remote desktop
@@ -187,6 +187,14 @@ You will suffer decreased performance for a few minutes after boot, but at least
 
 If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep.
 
+### NICE DCV
+
+If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. In Fallout: New Vegas, my camera pointed towards ground and only rotated - I wasn't able to look up. Enabling this option fixed the issue.
+
+### Steam compatibility
+
+After steam client is installed and you want to play Windows games on Linux, enable Steam play. If your game doesn't work properly, try to use different version of Proton.
+
 ### Costs
 
 You are charged for following resources, so try to keep them at bay:
@@ -202,7 +210,7 @@ I set up [AWS Budgets](https://aws.amazon.com/aws-cost-management/aws-budgets/) 
 Two budgets are free, so why not use them?
 
 
-
+### Links
 
 
 
