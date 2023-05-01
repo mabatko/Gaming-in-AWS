@@ -181,26 +181,31 @@ Either way, disk performance of instances launched from AMI is abysmal. AMIs are
 ```
 You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
 
-## Tips
+## Optional steps
 
 ### Termination check script
 
-If you use spot instance, you may want to have a separate SSH session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep.
+If you use spot instance, you may want to have a separate SSH or terminal session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep.
 
 ### NICE DCV
 
-If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. In Fallout: New Vegas, my camera pointed towards ground and only rotated - I wasn't able to look up. Enabling this option fixed the issue.
+If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. It locks your mouse pointer within NICE DCV window and you have to press Ctrl+Shift+F8 to free it. In Fallout: New Vegas and Fallout 4 was my camera pointing towards ground and only rotating - I wasn't able to look up. Enabling this option fixed the issue.
 
-### Steam compatibility
+### Steam settings
 
 After steam client is installed and you want to play Windows games on Linux, enable Steam play:
 ```
 Steam -> Settings -> Steam Play -> Enable Steam Play for all other titles
 ```
 
-If your game doesn't work properly, try to use different version of Proton:
+If your Windows game doesn't work properly, try to use different version of Proton:
 ```
 Select game in Library -> Manage (gear icon on the right) -> Properties -> Compatibility -> Force the use of a specifit Steam Play compatibility tool
+```
+
+If you want to know what frame rates your Steam games are running at, enable FPS counter:
+```
+Steam -> Settings -> In-Game -> In-game FPS counter
 ```
 
 ### Costs
