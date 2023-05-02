@@ -6,14 +6,14 @@
 
 ## Motivation
 
-I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however that I don't have PC powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~1000 euro for a new decent PC. 
+I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however that I don't have PC with GPU powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~800 euro for a new PC comparable to what I can get in cloud.
 
-It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 5000 hours to make buying a new PC more economical decision.
+It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 4000 hours to make buying a new PC more economical decision.
 
 ## Limitations
 
 If this sounds too good to be true, you are right. There are some limitations to consider.
-- Since your game is running (potentially) hundreds of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
+- Since your game is running hundreds (or maybe even thousands) of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
 - Cloud providers don't offer very wide range of GPUs and most of them are suitable for computing, not for 3D workloads. Even the most performant GPU I found in a cloud is only half as powerful as top-notch GeForce RTX 4090. Don't expect 4K max quality raytracing orgies any time soon.
 
 ## Setup
@@ -181,7 +181,7 @@ Either way, disk performance of instances launched from AMI is abysmal. AMIs are
 ```
 You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
 
-## Optional steps
+## Tips and optional steps
 
 ### Termination check script
 
@@ -190,6 +190,10 @@ If you use spot instance, you may want to have a separate SSH or terminal sessio
 ### NICE DCV
 
 If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. It locks your mouse pointer within NICE DCV window and you have to press Ctrl+Shift+F8 to free it. In Fallout: New Vegas and Fallout 4 was my camera pointing towards ground and only rotating - I wasn't able to look up. Enabling this option fixed the issue.
+
+As far as I know, NICE DCV can't strech remote screen (e.g., I want to have remote instance's 1920x1080 stretched to fullscreen on my 4K screen). As a workaround, I decrease resolution of my local screen to 1920x1080. I don't play games in 4K anyway and network bandwith decreases drastically (and so does data transfer costs).
+
+limit frame rate?
 
 ### Steam settings
 
@@ -208,13 +212,21 @@ If you want to know what frame rates your Steam games are running at, enable FPS
 Steam -> Settings -> In-Game -> In-game FPS counter
 ```
 
+### nvtop
+
 ### Costs
 
 You are charged for following resources, so try to keep them at bay:
 - EC2 instances
-- EBS volumes
-- EBS snapshots (AMIs fall under this category)
-- data transfer
+  - [Amazon EC2 On-Demand Pricing](https://aws.amazon.com/ec2/pricing/on-demand/)
+  - [Amazon EC2 Spot Instances Pricing](https://aws.amazon.com/ec2/spot/pricing/)
+- EBS volumes and snapshots (AMIs also fall under this category)
+  - [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/)
+  - If you use spot instances, don't keep EBS volumes. You can't use them anyway, so make EBS snapshots and delete the volumes.
+- Data transfer
+  - [Data Transfer pricing](https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer)
+  - AWS charges outgoing traffic from EC2 to the Internet (i.e. your remote desktop stream), however we get 100GB free each month, which should be enough for 30+ hours of playing at 30 FPS (give or take)
+  - Incoming traffic (i.e. you downloading games is free)
 
 ### AWS Budgets
 
@@ -222,8 +234,7 @@ I set up [AWS Budgets](https://aws.amazon.com/aws-cost-management/aws-budgets/) 
 
 Two budgets are free, so why not use them?
 
-
-### Links
+## Links
 
 
 
