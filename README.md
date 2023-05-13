@@ -1,12 +1,12 @@
 # Gaming in AWS
 
-**TLDR:** This repository contains information on how I set up my low cost gaming environment in AWS and how you can do it too.
+**TLDR:** This repository contains information on how I set up my low cost remote gaming environment in AWS and how you can do it too.
 
 ![KSP menu](ksp.png)
 
 ## Motivation
 
-I don't have a lot of free time, but sometimes when I do, I want to play games. Problem is however that I don't have PC with GPU powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~800 euro for a new PC comparable to what I can get in cloud.
+I don't have a lot of free time, but sometimes when I do, I want to play computer games. Problem is however that I don't have PC with GPU powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~800 euro for a new PC comparable to what I can get in a cloud.
 
 It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 4000 hours to make buying a new PC more economical decision.
 
@@ -15,6 +15,10 @@ It is possible to play games on a VM which costs less than 20 cents per hour. Th
 If this sounds too good to be true, you are right. There are some limitations to consider.
 - Since your game is running hundreds (or maybe even thousands) of kilometers away, there is some latency which can make playing less enjoyable or even downright frustrating. FPS games where every millisecond counts, or online games are probably not good candidates for this sort of shenanigans.
 - Cloud providers don't offer very wide range of GPUs and most of them are suitable for computing, not for 3D workloads. Even the most performant GPU I found in a cloud is only half as powerful as top-notch GeForce RTX 4090. Don't expect 4K max quality raytracing orgies any time soon.
+
+## When this makes sense?
+
+There are only few niches which gaming in AWS can fill.
 
 ## Setup
 
@@ -25,17 +29,19 @@ After a lot of research, I settled to following setup:
   - NICE DCV remote desktop
   - Steam client
 
+### AWS
+
+Let's start with the question "Why AWS?".
+
+AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g., half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
+
 ### g4ad.xlarge instance
 
 Why g4ad.xlarge EC2 instance?
 
-Let's start with the question "Why AWS?". AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g., half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
+There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though). Moreover, [AWS also claims](https://aws.amazon.com/blogs/compute/deep-dive-on-the-new-amazon-ec2-g4ad-instances/) that *the g4ad instance family has up to 40% better performance over g4dn for general-purpose graphics rendering, and gaming workloads in addition to 15%-25% lower cost.*
 
-So why g4ad family?
-
-There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though).
-
-Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU which scores ~50% better than Radeon PRO v520, but costs three time as much.
+Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU. [AWS says](https://aws.amazon.com/ec2/instance-types/g5/) that it delivers up to 3x better performance compared to g4dn. It scores ~50% better than Radeon PRO v520 in Passmark G3D benchmark, but costs three time as much.
 
 ### Ubuntu 18.04
 
@@ -145,7 +151,7 @@ If you are lost, [here is a screenshot](instance_creation.png).
 
 ### Connecting
 
-At this stage, you can connect to the instance as user 'ubuntu' via SSH with the private key from your SSH key pair. It takes 20-ish minutes for *user data* script to finish. You can see the progress in log file /var/log/cloud-init-output.log on the OS.
+At this stage, you can connect to the instance as user 'ubuntu' via SSH with the private key from your SSH key pair. It takes 20-ish minutes for *user data* script to finish. You can see the progress in log file `/var/log/cloud-init-output.log` on the OS.
 
 Instance is rebooted when the script finishes. When it boots up again, you can connect to it in following ways:
 - over SSH with user ubuntu
@@ -179,7 +185,9 @@ Either way, disk performance of instances launched from AMI is abysmal. AMIs are
 ```
 #@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log
 ```
-You will suffer decreased performance for a few minutes after boot, but at least in my case games start DRASTICALLY faster. To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
+You will suffer decreased performance after boot, but at least in my case games start DRASTICALLY faster. Unfortunately, read speed varies. Slowest I saw was 34.5MB/s.
+
+To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
 
 ## Tips and optional steps
 
@@ -191,9 +199,9 @@ If you use spot instance, you may want to have a separate SSH or terminal sessio
 
 If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. It locks your mouse pointer within NICE DCV window and you have to press Ctrl+Shift+F8 to free it. In Fallout: New Vegas and Fallout 4 was my camera pointing towards ground and only rotating - I wasn't able to look up. Enabling this option fixed the issue.
 
-As far as I know, NICE DCV can't strech remote screen (e.g., I want to have remote instance's 1920x1080 stretched to fullscreen on my 4K screen). As a workaround, I decrease resolution of my local screen to 1920x1080. I don't play games in 4K anyway and network bandwith decreases drastically (and so does data transfer costs).
+As far as I know, NICE DCV can't strech remote screen (e.g., I want to have remote instance's 1920x1080p stretched to fullscreen on my 4K screen). As a workaround, I decrease resolution of my local screen to 1920x1080. I don't play games in 4K anyway and network bandwith decreases drastically (and so does data transfer costs).
 
-limit frame rate?
+Default NICE DCV frame rate limit is 25 which is pretty low for FPS games. I increased it to 45. If you play slow paced games and you don't need high frame rate and want to save some bandwith, set `target-fps` in `/etc/dcv/dcv.conf` to whatever you want and restart `dcvserver` service.
 
 ### Steam settings
 
@@ -212,7 +220,9 @@ If you want to know what frame rates your Steam games are running at, enable FPS
 Steam -> Settings -> In-Game -> In-game FPS counter
 ```
 
-### nvtop
+### GPU utilization
+
+If you want to check GPU utilization of your instance, CLI utility `nvtop` is installed.
 
 ### Costs
 

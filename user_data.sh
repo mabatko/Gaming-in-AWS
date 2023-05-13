@@ -63,6 +63,7 @@ printf "$PASS\n$PASS\n\n" | passwd $MYUSER
 
 sed -i 's/#create-session = true/create-session = true/g' /etc/dcv/dcv.conf
 sed -i 's/#owner = ""/owner = "'"$MYUSER"'"/g' /etc/dcv/dcv.conf
+sed -i 's/#target-fps = 30/target-fps = 45/g' /etc/dcv/dcv.conf
 cd ..
 
 ####
@@ -82,6 +83,9 @@ sudo apt-get install --no-remove libc6:amd64 libc6:i386 libegl1:amd64 libegl1:i3
 #### Miscellaneous
 ####
 
+sudo sed -i 's/1/0/g' /etc/apt/apt.conf.d/10periodic
+sudo sed -i 's/1/0/g' /etc/apt/apt.conf.d/20auto-upgrades
+
 curl "https://raw.githubusercontent.com/mabatko/Gaming-in-AWS/main/termination_check.sh" -o "/home/$MYUSER/termination_check.sh"
 chown $MYUSER:$MYUSER /home/$MYUSER/termination_check.sh
 chmod 544 /home/$MYUSER/termination_check.sh
@@ -93,6 +97,8 @@ fi
 
 sudo apt install fio -y
 echo '#@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log' >> /etc/crontab
+
+sudo snap install nvtop
 
 rm -rf NICE-GPG-KEY amdgpu-pro-*.tar.xz amdgpu-pro-*-ubuntu-18.04/ aws/ awscliv2.zip nice-dcv-2023.0-14852-ubuntu1804-x86_64/ nice-dcv-2023.0-14852-ubuntu1804-x86_64.tgz
 
