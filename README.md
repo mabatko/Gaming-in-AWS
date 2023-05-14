@@ -6,7 +6,7 @@
 
 ## Motivation
 
-I don't have a lot of free time, but sometimes when I do, I want to play computer games. Problem is however that I don't have PC with GPU powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~800 euro for a new PC comparable to what I can get in a cloud.
+I don't have a lot of free time, but sometimes when I do, I want to play computer games. Problem is however that I don't have PC with GPU powerful enough to play modern-ish games. My current PC is OK for everything else though, so I don't want to spend ~800€ for a new PC comparable to what I can get in a cloud.
 
 It is possible to play games on a VM which costs less than 20 cents per hour. Therefore, I would have to play more than 4000 hours to make buying a new PC more economical decision.
 
@@ -35,11 +35,11 @@ Let's start with the question "Why AWS?".
 
 AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g., half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
 
-### g4ad.xlarge instance
+### g4ad instance family
 
 Why g4ad.xlarge EC2 instance?
 
-There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though). Moreover, [AWS also claims](https://aws.amazon.com/blogs/compute/deep-dive-on-the-new-amazon-ec2-g4ad-instances/) that *the g4ad instance family has up to 40% better performance over g4dn for general-purpose graphics rendering, and gaming workloads in addition to 15%-25% lower cost.*
+There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though). Moreover, [AWS also claims](https://aws.amazon.com/blogs/compute/deep-dive-on-the-new-amazon-ec2-g4ad-instances/) that *"the g4ad instance family has up to 40% better performance over g4dn for general-purpose graphics rendering, and gaming workloads in addition to 15%-25% lower cost."*
 
 Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU. [AWS says](https://aws.amazon.com/ec2/instance-types/g5/) that it delivers up to 3x better performance compared to g4dn. It scores ~50% better than Radeon PRO v520 in Passmark G3D benchmark, but costs three time as much.
 
@@ -51,19 +51,19 @@ You can go the easy route and pick Windows server - there is even AMI from AWS w
 
 So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed but give it a try and let me know :)).
 
-Another reason to go with Ubuntu is that Steam supports it. I tried Amazon Linux 2 AMI which comes with GPU driver preinstalled and I even managed to start Steam client, but all windows where black.
+Another reason to go with Ubuntu is that Steam supports it. I tried Amazon Linux 2 AMI which comes with GPU driver preinstalled and I even managed to start Steam client, but all windows were black.
 
 #### Spot EC2 instance
 
 For those who don't know, AWS (usually) has more capacity than is needed to satisfy customer demand. This spare capacity is sold in the form of spot EC2 instances at a discount. Caveat is that AWS can take this capacity back with only little warning (2 minutes). This didn't happen to me yet, but there is always a chance.
 
-For some, this inconvenience may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Kerbal space program does allow it, so I go with it. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
+For some, this inconvenience may not be worth the price (or rather saving). If your game doesn't allow you to save progress at any moment, spot instance is probably not for you. Games I play allow it, so I go with spot. Plus, in my region are g4ad.xlarge Linux spot instances sold with 70% discount. 
 
 As a side note: Azure and Google cloud spot instances can be price competitive, but they warn you only 30 seconds before they stop your instance.
 
 ### NICE DCV
 
-*NICE DCV is a high-performance remote display protocol. It lets you securely deliver remote desktops and application streaming from any cloud or data center to any device, over varying network conditions. By using NICE DCV with Amazon EC2, you can run graphics-intensive applications remotely on Amazon EC2 instances. You can then stream the results to more modest client machines, which eliminates the need for expensive dedicated workstations. *
+*NICE DCV is a high-performance remote display protocol. It lets you securely deliver remote desktops and application streaming from any cloud or data center to any device, over varying network conditions. By using NICE DCV with Amazon EC2, you can run graphics-intensive applications remotely on Amazon EC2 instances. You can then stream the results to more modest client machines, which eliminates the need for expensive dedicated workstations.*
 
 NICE DCV is free if you run it on AWS EC2 instance. I guess (hope) that it is better than using RDP for Windows or VNC for Linux. I haven't done any research in this area. If you did, let me know how it fairs in comparison with other options. I'm particularly interested in network bandwidth consumption.
 
@@ -193,13 +193,13 @@ To give you a perspective of how long it takes, 30GB gp3 EBS with default settin
 
 ### Termination check script
 
-If you use spot instance, you may want to have a separate SSH or terminal session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep.
+If you use spot instance, you may want to have a separate SSH or terminal session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep and prints out yellow or red timestamp when notice was issued.
 
 ### NICE DCV
 
 If your mouse is bahaving weirdly in games, try to enable "Relative Mouse Position" in NICE DVC client settings. It locks your mouse pointer within NICE DCV window and you have to press Ctrl+Shift+F8 to free it. In Fallout: New Vegas and Fallout 4 was my camera pointing towards ground and only rotating - I wasn't able to look up. Enabling this option fixed the issue.
 
-As far as I know, NICE DCV can't strech remote screen (e.g., I want to have remote instance's 1920x1080p stretched to fullscreen on my 4K screen). As a workaround, I decrease resolution of my local screen to 1920x1080. I don't play games in 4K anyway and network bandwith decreases drastically (and so does data transfer costs).
+As far as I know, NICE DCV can't strech remote screen (e.g., I want to have remote instance's 1920x1080p stretched to fullscreen on my 4K screen). As a workaround, I decrease resolution of my local screen to 1920x1080p. I don't play games in 4K anyway and network bandwith decreases drastically (and so does data transfer costs).
 
 Default NICE DCV frame rate limit is 25 which is pretty low for FPS games. I increased it to 45. If you play slow paced games and you don't need high frame rate and want to save some bandwith, set `target-fps` in `/etc/dcv/dcv.conf` to whatever you want and restart `dcvserver` service.
 
@@ -235,14 +235,47 @@ You are charged for following resources, so try to keep them at bay:
   - If you use spot instances, don't keep EBS volumes. You can't use them anyway, so make EBS snapshots and delete the volumes.
 - Data transfer
   - [Data Transfer pricing](https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer)
-  - AWS charges outgoing traffic from EC2 to the Internet (i.e. your remote desktop stream), however we get 100GB free each month, which should be enough for 30+ hours of playing at 30 FPS (give or take)
-  - Incoming traffic (i.e. you downloading games is free)
+  - AWS charges outgoing traffic from EC2 to the Internet (i.e. your remote desktop stream), however we get 100GB free each month, which should be enough for 30+ hours of playing at 45 FPS (give or take)
+  - Incoming traffic (i.e. you downloading games) is free
+
+#### Example
+
+To give you some sense about how much money we talk, here is my setup:
+- eu-central-1 (Franfurt) region - region with lowest latency
+- euc1-az3 zone - zone with cheapest spot instances
+
+For playing Fallout 4 I use:
+- g4ad.xlarge EC2 instance - 4 vCPU and 16 GB RAM is enough
+- 60 GB gp3 EBS volume with default IOPS and throughput
+- snapshot of above volume from which I create new instance has ~50 GB
+
+If I play for 20 hours in a 30 day month, I pay following:
+- g4ad.xlarge spot instance: $0.142 per hour
+  - 20 * $0.142 = $2.84
+- gp3 EBS volume: $0.0952 per GB-month
+  - 60 * 20 * $0.0952 / (30 * 24) = $0.16
+- EBS snapshot: $0.054 per GB-Month
+  - 50 * $0.054 = $2.7
+- data transfer our of AWS: $0.09 per GB
+  - 70 GB - within free tier
+- 20% VAT
+
+In total: **$6.84** per month or **$0.34** per gaming hour.
+
+As you can see, almost half of the cost is for storage of AMI. If I'm patient, not lazy and deploy fresh instance for each gaming session, I would pay **$0.18** per hour + ~$0.18 per session as an overhead for instance bootstrap and game installation.
+
 
 ### AWS Budgets
 
 I set up [AWS Budgets](https://aws.amazon.com/aws-cost-management/aws-budgets/) email notifications which let me know when I spend more than defined threshold. You will be glad you set it up when you forget to power off your gaming instance.
 
 Two budgets are free, so why not use them?
+
+## Feedback
+
+If you have ideas how to improve this guide, open an issue.
+
+If you think I deserver a coffe, you can buy me one.
 
 ## Links
 
