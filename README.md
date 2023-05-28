@@ -2,6 +2,8 @@
 
 **TLDR:** This repository contains information on how I set up my low cost remote gaming environment in AWS and how you can do it too.
 
+If you are not interested in how I came to final setup, you can skip the theory and jump right to [pre-requisites](#-pre-requisites).
+
 ![KSP menu](ksp.png)
 
 ## Motivation
@@ -33,13 +35,17 @@ After a lot of research, I settled to following setup:
 
 Let's start with the question "Why AWS?".
 
-AWS seems to provide the best GPU performance for your money. Azure of course also provides GPU accelerated instances suitable for gaming, but their small sized VMs have access only to a fraction of a GPU. If you want to have e.g., half of NVIDIA A10, you must launch instance with 18 vCPUs and 220GB of RAM (Standard_NV18ads_A10_v5). That's bit of an overkill for playing a game and it also isn't cheap. I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
+In a nutshell, AWS seems to provide the best GPU performance for your money. 
+
+Azure of course also has instance families with GPUs which are suitable for gaming but those are either not as powerfull as AWS ones ([NCasT4_v3 family](https://learn.microsoft.com/en-us/azure/virtual-machines/nct4-v3-series)) or are not cost competitive ([NVadsA10v5](https://learn.microsoft.com/en-us/azure/virtual-machines/nva10v5-series)).
+
+I briefly had a look also on Google cloud, but as far as I can tell, they provide only GPU instances inferior to AWS and are more expensive.
 
 ### g4ad instance family
 
 Why g4ad.xlarge EC2 instance?
 
-There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark (I wasn't able to verify that myself though). Moreover, [AWS also claims](https://aws.amazon.com/blogs/compute/deep-dive-on-the-new-amazon-ec2-g4ad-instances/) that *"the g4ad instance family has up to 40% better performance over g4dn for general-purpose graphics rendering, and gaming workloads in addition to 15%-25% lower cost."*
+There is also g4dn family in AWS with NVIDIA Tesla T4 GPU, but it is more expensive than g4ad (at least in my region at this time). Also, according to [this site](https://www.videocardbenchmark.net/gpu_list.php) Radeon GPU scores ~15% better in Passmark G3D benchmark. Moreover, [AWS also claims](https://aws.amazon.com/blogs/compute/deep-dive-on-the-new-amazon-ec2-g4ad-instances/) that *"the g4ad instance family has up to 40% better performance over g4dn for general-purpose graphics rendering, and gaming workloads in addition to 15%-25% lower cost."*
 
 Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU. [AWS says](https://aws.amazon.com/ec2/instance-types/g5/) that it delivers up to 3x better performance compared to g4dn. It scores ~50% better than Radeon PRO v520 in Passmark G3D benchmark, but costs three time as much.
 
@@ -47,11 +53,11 @@ Another AWS EC2 family suitable for gaming is g5 with NVIDIA A10G GPU. [AWS says
 
 Now, when we have instance type sorted out, it's time to decide operating system.
 
-You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances (again, in my region). Since playing cheaply is my main driver, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run natively on Linux. Fortunately, there is Proton from Steam which partially plugs this hole for me (but you may be out of luck).
+You can go the easy route and pick Windows server - there is even AMI from AWS with Windows Server 2019 and driver preinstalled. It works nicely and you can play all the games in a few minutes. What's the catch? On-demand Windows instances are ~50% more expensive than Linux instances and more than twice as expensive when it comes to spot instances (again, in my region). Since playing cheaply is my main objective, I go with Linux (also, being a former Unix admin may play a role). Downside is that many games in my Steam library don't run natively on Linux. Fortunately, there is Proton from Steam which partially plugs this hole for me (but you may be out of luck).
 
-So why Ubuntu 18.04 which celebrates five years since release when these lines are written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed but give it a try and let me know :)).
+So why Ubuntu 18.04 which celebrates five years since release when these lines are being written? It's simple. AMD GPU driver for Ubuntu works only with Ubuntu 18.04. Newer Ubuntu versions are not supported (I tried and failed but give it a try and let me know :)).
 
-Another reason to go with Ubuntu is that Steam supports it. I tried Amazon Linux 2 AMI which comes with GPU driver preinstalled and I even managed to start Steam client, but all windows were black.
+Another reason to go with Ubuntu is that Steam supports it. I tried Amazon Linux 2 AMI which comes with GPU driver preinstalled and I even managed to start Steam client, but all windows were black so I couldn't install any game.
 
 #### Spot EC2 instance
 
@@ -80,7 +86,7 @@ Apart from installation of Linux native games, Steam has some features which are
 
 ### Region
 
-First and foremost, you must select a region based on these criteria:
+If you want to try this setup yourself, first and foremost, you must select a region based on these criteria:
 - it must have g4ad instances - not all regions have them
 - it should be geographically close to you in order to have better latency
 - if you are price sensitive, select more distant but cheaper region
@@ -93,7 +99,7 @@ You can check instance type availability and pricing on these pages:
 
 ### Limits for g4ad family
 
-My first attempt to launch g4ad.xlarge instance failed because default limit is 0 cores. You can check your limit this way:
+My first attempt to launch g4ad.xlarge instance failed because default limit is set to 0 cores. You can check your limit this way:
 1. go to region which you want to use
 2. go to EC2 service
 3. on the left-hand side menu select "Limits"
@@ -103,19 +109,19 @@ You should see two entries:
 - All G and VT Spot Instance Requests
 - Running On-Demand All G and VT instances
 
-In my case, both were set to 0 vCPU. I requested increase to 4 vCPU (because g4ad.xlarge has 4 cores). At first my requests were auto-declined, because I don't have high AWS bills (as a reason for decline AWS stated that they are protecting me from unexpectedly high invoice). I appealed the decision and re-opened the requests. I argued that I'm certified AWS solutions architect and developer (which I really am :)) and hopefully I know what I'm doing. Humans took over the requests and my limits were increased in about a day.
+In my case, both were set to 0 vCPU. I requested increase to 4 vCPU (because g4ad.xlarge has 4 cores). At first my requests were auto-declined, because I didn't have high AWS bills (as a reason for decline AWS stated that they are protecting me from unexpectedly high invoice). I appealed the decision and re-opened the requests. I argued that I'm certified AWS solutions architect and developer (which I really am :)) and hopefully I know what I'm doing. Humans took over the requests and my limits were increased in about a day.
 
 ### VPC, subnet, instance profile, etc...
 
 Before you launch anything, I suggest you have following resources created:
-- VPC
-- subnet
+- VPC with network resources (internet gateway, routing table, ...)
+- subnet(s)
   - not all availability zones in a region must have g4ad instances available (in my region only two out of three have them)
     - spot prices for instances don't have to be the same in all availability zones (there is a small difference in my region)
   - subnet should be public, i.e., you should be able to reach your instance over the Internet
 - security group
-  - I allowed all traffic incoming from my IP
-    - if your IP changes, you will have to update this rule
+  - for simplicity sake, I allowed all traffic incoming from my IP
+    - if my IP changes, I will have to update this rule
 - key pair
 - role for instance (instance profile)
   - your EC2 instance's instance profile must allow it to get objects from S3 buckets
@@ -130,18 +136,18 @@ Before you launch anything, I suggest you have following resources created:
 ### Launching EC2 (spot) instance
 
 When I launch my gaming instance, I select following options:
-- **Name:** whatever
+- **Name:** name of the game
 - **Application and OS Images (Amazon Machine Image)**: Ubuntu 18.04 is not offered by AWS in a drop-down menu anymore, because it is too old. However, Ubuntu 18.04 AMIs are still maintained and kept up to date by Canonical - company behind Ubuntu. You can find the most up-to-date AMI for your region on [this page](https://cloud-images.ubuntu.com/locator/ec2/). Copy AMI ID from there and search for it in AWS console. You will find the AMI under Community AMIs.
 - **Instance type:** g4ad.xlarge
 - **Key pair (login):** key pair created as a pre-requisite
 - **Network settings:**
   - **Network:** VPC you created as a pre-requisite
-  - **Subnet:** Subnet you created as a pre-requisite. If you have more subnets, pick the one with cheapest spot instance.
+  - **Subnet:** Subnet you created as a pre-requisite. If you have more subnets, pick the one with the cheapest spot price.
   - **Security groups:** Pick the one you created as a pre-requisite
 - **Storage:** 
-  - **Size:** ~10GB is taken by OS, so you definitely want more than that
+  - **Size:** ~10GB is taken by OS, so you definitely want more than that. Have a look on your game's Steam store page where disk requirements are usually mentioned.
   - **Volume type:** gp3 should be cheaper than gp2 and more performant
-  - :warning: **Delete on termination:** Select "No". This is important if you use spot instance. By default, when EC2 instance is terminated, root disk is deleted. In our case it would mean that everything is lost when you shut down your EC2.
+  - :warning: **Delete on termination:** Select "No". This is important if you use spot instance. By default, when EC2 instance is terminated, root disk is deleted. In our case it would mean that everything is lost when you shut down your EC2 (unless you always want to start from scratch).
 - **Advanced details:**
   - **Request Spot Instances:** ☑
   - **IAM instance profile:** Pick the one you created as a pre-requisite
@@ -151,14 +157,16 @@ If you are lost, [here is a screenshot](instance_creation.png).
 
 ### Connecting
 
-At this stage, you can connect to the instance as user 'ubuntu' via SSH with the private key from your SSH key pair. It takes 20-ish minutes for *user data* script to finish. You can see the progress in log file `/var/log/cloud-init-output.log` on the OS.
+When instance is running, you can connect to it as user `ubuntu` via SSH with the private key from your SSH key pair. It takes 20-ish minutes for *user data* script to finish. You can see the progress in log file `/var/log/cloud-init-output.log` on the OS.
 
 Instance is rebooted when the script finishes. When it boots up again, you can connect to it in following ways:
-- over SSH with user ubuntu
-- over SSH with user which was defined in variable MYUSER of *user data* script (unless MYUSER=ubuntu)
+- over SSH with user ubuntu and key defined during instance creation
+- over SSH with user which was defined in variable MYUSER of *user data* script (unless `MYUSER=ubuntu`)
+  - either with password or with key defined during instacne creation
 - using NICE DCV client
   - clients for Windows, Linux and MacOS can be downloaded from [here](https://download.nice-dcv.com/)
   - log in to the instance with username/password from the *user data* script
+  - this is how you connect for playing a game
 
 ### Steam
 
@@ -181,19 +189,19 @@ Broadly speaking, you have following options:
 
 Since AMIs are immutable, if you want to always preserve latest changes to the disk, you must create new AMI after every gaming session. If you don't need it (e.g. because game saves are in Steam cloud), you can create *golden AMI* and always start your instance from it.
 
-Either way, disk performance of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore, it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needs them. This can be done by good old dd command, but *user data* script installs utility called fio. Advantage of fio is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in /etc/crontab file:
+Either way, disk performance of instances launched from AMI is abysmal. AMIs are just EBS snapshots stored in S3 and lazy loaded when read request is made. Therefore, it is necessary (or not, if you are patient) to initialize (or pre-warm) EBS volume. This is done by reading all disk blocks before an application really needs them. This can be done by good old dd command, but *user data* script installs utility called `fio`. Advantage of `fio` is that it can run multiple threads, so initialization is much faster. If you want this initialization to be triggered right after boot, uncomment following line in `/etc/crontab` file:
 ```
 #@reboot root fio --filename=/dev/nvme0n1 --rw=read --bs=128k --iodepth=32 --ioengine=libaio --direct=1 --name=volume-initialize >> /var/log/fio.log
 ```
-You will suffer decreased performance after boot, but at least in my case games start DRASTICALLY faster. Unfortunately, read speed varies. Slowest I saw was 34.5MB/s.
+You will suffer decreased performance after boot, but at least in my case games start DRASTICALLY faster. Unfortunately, read speeds vary. Slowest I saw was 34.5MB/s, fastest was 77 MB/s.
 
-To give you a perspective of how long it takes, 30GB gp3 EBS with default settings was initialized in 7 minutes (average read speed 77 MB/s). Subsequent executions of the command finish almost twice as fast (average read speed 126 MB/s)
+To give you a perspective of how long it takes, 30GB gp3 EBS with default settings can be initialized between 7 and 15 minutes. Subsequent executions of the command finish with average read speed of 126 MB/s (which is performance advertised by AWS).
 
 ## Tips and optional steps
 
 ### Termination check script
 
-If you use spot instance, you may want to have a separate SSH or terminal session opened with running `termination_check.sh` script. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep and prints out yellow or red timestamp when notice was issued.
+If you use spot instance, you may want to have a separate SSH or terminal session opened with running `termination_check.sh` script. The script is in home directory of user specified in *user data* script. It checks instance's metadata every 5 seconds for rebalance recommendation and interruption notice. If one is received, script tries to beep and prints out yellow or red timestamp when notice was issued. It didn't happen to me yet and AWS claims that 92% of all spot instances are terminated by the user, but just in case this happens to you, little heads-up (2 minutes) can be useful. 
 
 ### NICE DCV
 
@@ -207,7 +215,7 @@ Default NICE DCV frame rate limit is 25 which is pretty low for FPS games. I inc
 
 After steam client is installed and you want to play Windows games on Linux, enable Steam play:
 ```
-Steam -> Settings -> Steam Play -> Enable Steam Play for all other titles
+`Steam -> Settings -> Steam Play -> Enable Steam Play for all other titles
 ```
 
 If your Windows game doesn't work properly, try to use different version of Proton:
@@ -235,7 +243,7 @@ You are charged for following resources, so try to keep them at bay:
   - If you use spot instances, don't keep EBS volumes. You can't use them anyway, so make EBS snapshots and delete the volumes.
 - Data transfer
   - [Data Transfer pricing](https://aws.amazon.com/ec2/pricing/on-demand/#Data_Transfer)
-  - AWS charges outgoing traffic from EC2 to the Internet (i.e. your remote desktop stream), however we get 100GB free each month, which should be enough for 30+ hours of playing at 45 FPS (give or take)
+  - AWS charges outgoing traffic from EC2 to the Internet (i.e. your remote desktop stream), however we get 100GB free each month, which should be enough for 20+ hours of playing at 45 FPS (give or take)
   - Incoming traffic (i.e. you downloading games) is free
 
 #### Example
@@ -256,7 +264,7 @@ If I play for 20 hours in a 30 day month, I pay following:
   - 60 * 20 * $0.0952 / (30 * 24) = $0.16
 - EBS snapshot: $0.054 per GB-Month
   - 50 * $0.054 = $2.7
-- data transfer our of AWS: $0.09 per GB
+- data transfer out of AWS: $0.09 per GB
   - 70 GB - within free tier
 - 20% VAT
 

@@ -93,6 +93,9 @@ chmod 544 /home/$MYUSER/termination_check.sh
 if [[ "$MYUSER" != "ubuntu" ]]
 then
   echo "$MYUSER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/90-cloud-init-users
+  mkdir /home/$MYUSER/.ssh
+  cp /home/ubuntu/.ssh/authorized_keys /home/$MYUSER/.ssh/authorized_keys
+  chown -R $MYUSER:$MYUSER /home/$MYUSER/.ssh
 fi
 
 sudo apt install fio -y
