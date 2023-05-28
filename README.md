@@ -2,7 +2,7 @@
 
 **TLDR:** This repository contains information on how I set up my low cost remote gaming environment in AWS and how you can do it too.
 
-If you are not interested in how I came to final setup, you can skip the theory and jump right to [pre-requisites](#-pre-requisites).
+If you are not interested in how I came to final setup, you can skip the theory and jump right to [pre-requisites](#pre-requisites).
 
 ![KSP menu](ksp.png)
 
@@ -162,11 +162,11 @@ When instance is running, you can connect to it as user `ubuntu` via SSH with th
 Instance is rebooted when the script finishes. When it boots up again, you can connect to it in following ways:
 - over SSH with user ubuntu and key defined during instance creation
 - over SSH with user which was defined in variable MYUSER of *user data* script (unless `MYUSER=ubuntu`)
-  - either with password or with key defined during instacne creation
+  - either with password or with key defined during instance creation
 - using NICE DCV client
   - clients for Windows, Linux and MacOS can be downloaded from [here](https://download.nice-dcv.com/)
   - log in to the instance with username/password from the *user data* script
-  - this is how you connect for playing a game
+  - this is how you connect to play a game
 
 ### Steam
 
