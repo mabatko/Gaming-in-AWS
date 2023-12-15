@@ -64,6 +64,7 @@ printf "$PASS\n$PASS\n\n" | passwd $MYUSER
 sed -i 's/#create-session = true/create-session = true/g' /etc/dcv/dcv.conf
 sed -i 's/#owner = ""/owner = "'"$MYUSER"'"/g' /etc/dcv/dcv.conf
 sed -i 's/#target-fps = 30/target-fps = 45/g' /etc/dcv/dcv.conf
+sed -i 's/#enable-quic-frontend = true/enable-quic-frontend = true/g' /etc/dcv/dcv.conf
 cd ..
 
 ####

@@ -20,7 +20,13 @@ If this sounds too good to be true, you are right. There are some limitations to
 
 ## When this makes sense?
 
-There are only few niches which gaming in AWS can fill.
+With services like [GeForce NOW](https://www.nvidia.com/en-eu/geforce-now/) (for 11€/month) there are only few niches which gaming in AWS can fill. For example:
+- game you want to play is not availabe in such service
+- you need access to operating system to do changes to the game (mods, etc.)
+- you play so little and infrequently that you don't want to pay for month long membership
+- you have AWS credits you want to burn
+
+Let me know if you have other reason why to play games in AWS.
 
 ## Setup
 
