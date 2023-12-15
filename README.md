@@ -288,13 +288,3 @@ Two budgets are free, so why not use them?
 ## Feedback
 
 If you have ideas how to improve this guide, open an issue.
-
-If you think I deserver a coffe, you can buy me one.
-
-## Links
-
-
-
-
-
-
